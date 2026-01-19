@@ -1,0 +1,102 @@
+if game.CoreGui:FindFirstChild("AutoClaimMenu") then
+    game.CoreGui:FindFirstChild("AutoClaimMenu"):Destroy()
+end
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AutoClaimMenu"
+ScreenGui.Parent = game.CoreGui
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 180, 0, 100)
+MainFrame.Position = UDim2.new(0.5, -90, 0.5, -50)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 10)
+Corner.Parent = MainFrame
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+Title.BorderSizePixel = 0
+Title.Text = "Auto Claim"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.Parent = MainFrame
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = Title
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 22, 0, 22)
+CloseButton.Position = UDim2.new(1, -26, 0, 4)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 12
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = MainFrame
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 5)
+CloseCorner.Parent = CloseButton
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(1, -20, 0, 45)
+ToggleButton.Position = UDim2.new(0, 10, 0, 40)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(70, 200, 70)
+ToggleButton.Text = "▶ START"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 16
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Parent = MainFrame
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 8)
+ToggleCorner.Parent = ToggleButton
+local ClaimFootball = game:GetService("ReplicatedStorage")
+    :WaitForChild("Shared")
+    :WaitForChild("Util")
+    :WaitForChild("modules")
+    :WaitForChild("framework")
+    :WaitForChild("")
+    :WaitForChild("Loop")
+    :WaitForChild("RF")
+    :WaitForChild("ClaimFootball")
+local function IsUUID(name)
+    return string.match(name, "^%x+%-%x+%-%x+%-%x+%-%x+$") ~= nil
+end
+local function Claim(name)
+    spawn(function()
+        pcall(function()
+            ClaimFootball:InvokeServer(name)
+        end)
+    end)
+end
+local isRunning = false
+local connection = nil
+ToggleButton.MouseButton1Click:Connect(function()
+    isRunning = not isRunning
+    if isRunning then
+        ToggleButton.Text = "⏹ STOP"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+        local tempFolder = workspace:WaitForChild("Temp")
+        for _, obj in pairs(tempFolder:GetChildren()) do
+            if IsUUID(obj.Name) then
+                Claim(obj.Name)
+            end
+        end
+        connection = tempFolder.ChildAdded:Connect(function(obj)
+            if IsUUID(obj.Name) then
+                Claim(obj.Name)
+            end
+        end)
+    else
+        ToggleButton.Text = "▶ START"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(70, 200, 70)
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+    end
+end)
